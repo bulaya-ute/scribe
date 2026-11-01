@@ -69,3 +69,23 @@ media; any screenshot; Firefox and Safari (NFR-compat); ACC-perf on a 4-core mac
   the emitted copy is unused. Not removed.
 - Chichewa (`ny`) and Bemba (`bem`): not in Whisper base's language tokens. Disabled in the
   UI; see OQ-whisper-languages.
+
+## Re-verification — 2026-11-01 (worker build, ui-v2-build 4d7709c)
+
+Run on the local preview (vite preview, port 4173) in Chromium.
+
+- **FLM-main-thread-block — fixed.** Inference now runs in `src/transcribe.worker.js`.
+  During a 75 s, three-chunk run the page answered every poll: 0 unresponsive samples
+  over 45 s. Previously the page stalled about 5 s per chunk.
+- **RUL-progress / ACC-transcribe-rendered-desktop (partly):** multi-chunk progress
+  observed: model download 13→100 %, then "chunk 1 of 3" (33 %) and "chunk 2 of 3"
+  (67 %), then Done. Screenshots still not taken.
+- **OQ-whisper-languages — decided:** Chichewa and Bemba removed from the UI and
+  the code. Offered languages: auto, en, fr, pt, sw, es, de.
+- **ACC-no-upload:** origins contacted during the run: only http://localhost:4173.
+- **ACC-cache:** Cache Storage holds `transformers-cache`; model downloaded once per page.
+- **ACC-restart:** "Start over" hides result and status, clears the file name.
+- **ACC-transcribe-behaviour (caveat):** the clip is a synthetic tone, so the output is
+  Whisper's repetition, not speech. Accuracy is unverified. The v1.1.1 build gave the
+  same text for this clip, so this is not a regression from the worker.
+- **Unit tests:** `npm test` → 8/8 pass.
