@@ -1,0 +1,92 @@
+/* Design tokens (PRAC-1): the only file that holds colour, size or motion literals.
+   Components read these variables. Dark is the default when the OS asks for it;
+   data-theme overrides it (RUL-theme-system). */
+
+:root {
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --target: 44px;
+  --max: 760px;
+
+  --dur-fast: 120ms;
+  --dur-medium: 200ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Dark (default when the OS asks for it) */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e1116;
+  --surface: #161b22;
+  --surface-2: #1d232c;
+  --line: #2c3440;
+  --text: #e6e9ef;
+  --muted: #a7b0bd;          /* 8.4:1 on --bg, 7.3:1 on --surface-2 */
+  --accent: #8ab4f8;         /* primary button fill */
+  --on-accent: #0b1424;      /* 9.9:1 on --accent */
+  --accent-ink: #9cc3ff;     /* links and focus ring */
+  --focus: #9cc3ff;
+  --ok: #7ee2a8;
+  --danger: #ffb4a9;
+  --danger-bg: #3a1d1b;
+  --danger-line: #7a3a33;
+  --bar-track: #242c37;
+  --preview-bg: #0a0d12;
+  --preview-text: #e6e9ef;
+}
+
+/* Light, when the OS asks for it and no choice is saved */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface-2: #f0f2f5;
+    --line: #d5dae2;
+    --text: #151a22;
+    --muted: #4d5666;        /* 7.9:1 on --bg, 7.3:1 on --surface-2 */
+    --accent: #1f5fd1;
+    --on-accent: #ffffff;    /* 6.1:1 */
+    --accent-ink: #1f5fd1;   /* 6.1:1 on --surface */
+    --focus: #1f5fd1;
+    --ok: #13703d;
+    --danger: #8a1f14;
+    --danger-bg: #fbeceb;
+    --danger-line: #e4a79f;
+    --bar-track: #e1e5eb;
+    --preview-bg: #f8f9fb;
+    --preview-text: #151a22;
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --line: #d5dae2;
+  --text: #151a22;
+  --muted: #4d5666;
+  --accent: #1f5fd1;
+  --on-accent: #ffffff;
+  --accent-ink: #1f5fd1;
+  --focus: #1f5fd1;
+  --ok: #13703d;
+  --danger: #8a1f14;
+  --danger-bg: #fbeceb;
+  --danger-line: #e4a79f;
+  --bar-track: #e1e5eb;
+  --preview-bg: #f8f9fb;
+  --preview-text: #151a22;
+}

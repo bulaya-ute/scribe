@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Scribe — video to markdown, on-device</title>
+    <meta name="description" content="Turn a video or audio file into a markdown transcript. The file never leaves your browser." />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to tool</a>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+            <rect x="3" y="7" width="18" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2" />
+            <path d="M23 13l6-3v12l-6-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+            <path d="M9 16h6M9 19h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          <span class="brand-name">Scribe</span>
+        </div>
+        <div class="topbar-end">
+          <span class="pill" title="Decoding and transcription run in this tab">On-device</span>
+          <button id="theme" class="icon-btn" type="button" aria-label="Switch colour theme">
+            <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span id="theme-label" class="sr-only">Theme: system</span>
+          </button>
+        </div>
+      </header>
+
+      <main id="main">
+        <section class="intro">
+          <h1>Video or audio to markdown</h1>
+          <p class="lede">Choose a file. It is read and transcribed in this tab. Nothing is uploaded.</p>
+        </section>
+
+        <section class="card" aria-labelledby="work-title">
+          <h2 id="work-title" class="sr-only">Transcribe a file</h2>
+
+          <div id="dropzone" class="dropzone">
+            <p class="dz-title" id="dz-title">Drop a file here</p>
+            <p class="dz-help">MP4, MOV, WebM, MKV, M4A, MP3 or WAV</p>
+            <button id="pick" class="btn btn-primary" type="button" aria-describedby="dz-title">Choose file</button>
+            <input id="file" type="file" accept="video/*,audio/*,.mp4,.mov,.webm,.mkv,.m4a,.mp3,.wav" hidden />
+            <p id="file-name" class="file-name" hidden></p>
+          </div>
+
+          <div class="opts">
+            <label class="field">
+              <span class="field-label">Language</span>
+              <select id="language">
+                <option value="auto">Auto-detect</option>
+                <option value="en">English</option>
+                <option value="fr">French</option>
+                <option value="pt">Portuguese</option>
+                <option value="sw">Swahili</option>
+                <option value="ny" disabled>Chichewa (not supported by the model)</option>
+                <option value="bem" disabled>Bemba (not supported by the model)</option>
+                <option value="es">Spanish</option>
+                <option value="de">German</option>
+              </select>
+            </label>
+            <label class="check">
+              <input id="timestamps" type="checkbox" checked />
+              <span>Include timestamps</span>
+            </label>
+          </div>
+
+          <p id="advisory" class="advisory" hidden></p>
+
+          <div id="status" class="status" hidden>
+            <div class="status-head">
+              <p id="status-text" class="status-text" aria-live="polite">Working…</p>
+              <p id="status-pct" class="status-pct"></p>
+            </div>
+            <div class="bar" id="bar" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100">
+              <span id="bar-fill"></span>
+            </div>
+            <ol class="steps" id="steps">
+              <li data-step="decode">Extract audio</li>
+              <li data-step="model">Load model</li>
+              <li data-step="transcribe">Transcribe</li>
+            </ol>
+            <ul class="dl-list" id="dl-list" aria-label="Model files"></ul>
+            <pre id="partial" class="partial" hidden></pre>
+            <p id="status-note" class="note"></p>
+          </div>
+
+          <div id="error" class="error" role="alert" hidden>
+            <p id="error-text"></p>
+            <p id="error-code" class="error-code"></p>
+            <button id="retry" class="btn" type="button" hidden>Try again</button>
+          </div>
+
+          <div id="result" class="result" hidden>
+            <div class="result-head">
+              <h2>Transcript</h2>
+              <div class="result-actions">
+                <button id="copy" class="btn" type="button">Copy markdown</button>
+                <button id="download" class="btn btn-primary" type="button">Download .md</button>
+                <button id="again" class="btn btn-ghost" type="button">Start over</button>
+              </div>
+            </div>
+            <dl id="meta" class="meta"></dl>
+            <pre id="preview" class="preview" tabindex="0" aria-label="Transcript markdown"></pre>
+          </div>
+        </section>
+
+        <section class="notes" aria-label="About this tool">
+          <p><strong>How it works.</strong> Your browser decodes the audio track, resamples it to 16 kHz, and runs Whisper (base, quantised) through WebAssembly.</p>
+          <p><strong>Long files.</strong> There is no size cap. A tab can only hold so much; if it runs out, you get a message and can try a shorter clip.</p>
+          <p><strong>Accuracy.</strong> A small model: clear speech works well, accents, music and names less so. Skim before you publish.</p>
+        </section>
+      </main>
+
+      <footer class="foot">
+        <span>No uploads</span>
+        <span>Scribe <span id="version">v?</span></span>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

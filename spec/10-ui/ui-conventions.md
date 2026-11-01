@@ -30,5 +30,9 @@ a blank panel with no stage name while work is running.
 
 ## Theme
 
-- Dark only at MVP (`manifest.csv: themes=dark`). Light theme is recorded as polish
-  `POL-themes` and opens only after acceptance (PRAC-13).
+- Light and dark (`manifest.csv: themes=system`, RUL-theme-system, DEC-theme-system).
+  The OS preference is the default; the visible toggle in the top bar stores the
+  visitor's choice in localStorage, which then overrides the OS setting.
+- Both themes meet 4.5:1 for body text. Measured 2026-11-01 in Chromium: light
+  lowest 5.81:1, dark lowest 7.21:1 on the measured pairs.
+- The earlier POL-themes wish is closed by DEC-theme-system (promoted to requirement).
