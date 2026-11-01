@@ -1,0 +1,5 @@
+id,key,type,default,effect,affects,status,source,notes
+SET-language,language,enum:auto|en|fr|pt|sw|ny|bem|es|de,auto,Language passed to the transcriber; auto leaves detection to the model.,UC-choose-language;UC-transcribe,accepted,owner,
+SET-timestamps,timestamps,boolean,true,"Emit a timestamp per chunk in the markdown, or one flowing paragraph.",UC-toggle-timestamps,accepted,owner,
+SET-chunk-seconds,chunk_seconds,integer,30,Audio slice length per transcription step; smaller gives finer progress and more boundary merges.,UC-transcribe;RUL-chunking,accepted,owner,
+SET-model,model,string,Xenova/whisper-base,"Which vendored model the app loads; changing it changes size, speed and accuracy.",UC-transcribe;NFR-perf,accepted,owner,

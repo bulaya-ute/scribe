@@ -1,0 +1,9 @@
+# Local development stack — builds the image instead of pulling it.
+# PRIN-3 (b): `build:` lives only here, never in docker-compose.yml.
+#
+#   npm install && npm run build          # produces dist/
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+services:
+  scribe:
+    build: .
+    image: scribe:dev

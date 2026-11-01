@@ -1,0 +1,3 @@
+id,name,kind,description,status,source,notes
+ACT-visitor,Visitor,human,"Anyone with a video or audio file who wants a readable transcript, without uploading it anywhere.",accepted,owner,
+ACT-maintainer,Maintainer,human,Runs the static stack and publishes new builds with current vendored assets.,accepted,owner,

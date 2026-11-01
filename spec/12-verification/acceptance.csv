@@ -1,0 +1,15 @@
+id,target,kind,given,when,then,device,status,source,notes
+ACC-transcribe-behaviour,UC-transcribe,behaviour,A visitor with a supported video file and a cached model,They drop the file and let the run finish,"A markdown transcript matching the spoken audio is shown, with copy and download enabled",desktop,accepted,owner,
+ACC-transcribe-rendered-desktop,UC-transcribe,rendered,The app open at desktop width,The processing state is reached,"Progress shows chunk n of m, elapsed/remaining and partial text; the bar advances every chunk",desktop,accepted,owner,
+ACC-transcribe-rendered-tablet,UC-transcribe,rendered,The app open at tablet width,A file is processed,The same information is visible without horizontal scrolling and controls stay 44 px,tablet,accepted,owner,
+ACC-transcribe-rendered-mobile,UC-transcribe,rendered,The app open at mobile width,A file is processed,The same information is visible without horizontal scrolling and controls stay 44 px,mobile,accepted,owner,
+ACC-language,UC-choose-language,behaviour,A language is selected before the run,The transcript is produced,The markdown header names that language and the text follows it,desktop,accepted,owner,
+ACC-timestamps,UC-toggle-timestamps,behaviour,Timestamps are enabled,The transcript renders,Each chunk appears as its own timestamped paragraph; disabled yields one paragraph,desktop,accepted,owner,
+ACC-copy,UC-copy-markdown,behaviour,A finished transcript,Copy is pressed,The markdown text is on the clipboard and the control confirms; a denied permission explains itself,desktop,accepted,owner,
+ACC-download,UC-download-markdown,behaviour,A finished transcript,Download is pressed,A .md file named after the source saves with the displayed content,desktop,accepted,owner,
+ACC-recover-decode,UC-recover,behaviour,A container the browser cannot decode,The run starts,"The fallback decoder is attempted, and if it fails the message names accepted formats",desktop,accepted,owner,"FAILS today: fallback engages but hangs (see FLM-fallback-hang, OQ-codec-fallback). Requirement stands; build does not meet it."
+ACC-restart,UC-restart,behaviour,A finished transcript,Start over is pressed,"The form resets, the model stays loaded, and a new file can be processed immediately",desktop,accepted,owner,
+ACC-no-upload,RUL-local-only,nfr,Any run,Processing completes,The performance log shows zero requests to origins other than the page origin,desktop,accepted,owner,
+ACC-cache,RUL-model-cache,nfr,A model already downloaded,The page is reloaded and a new file processed,Model requests report zero transferred bytes,desktop,accepted,owner,
+ACC-perf,NFR-perf,nfr,A 6-second clip and a cached model,The run finishes,Elapsed time is under 30 seconds on a 4-core machine,desktop,accepted,owner,
+ACC-security,NFR-security,nfr,The deployed site,Any page is served,"CSP, nosniff and noindex headers are present and no third-party origin is contacted",desktop,accepted,owner,

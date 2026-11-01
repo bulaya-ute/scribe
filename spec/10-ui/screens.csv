@@ -1,0 +1,2 @@
+id,name,purpose,use_cases,devices,context,landing,params,status,source,notes
+SCR-main,Scribe,"Accept a video or audio file, run the on-device transcription, and hand back markdown.",UC-transcribe;UC-choose-language;UC-toggle-timestamps;UC-copy-markdown;UC-download-markdown;UC-recover;UC-restart,desktop;tablet;mobile,public,true,,accepted,owner,

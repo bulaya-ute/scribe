@@ -1,0 +1,33 @@
+# Scribe — static on-device transcript tool (PRIN-3 stack).
+#
+# One deployable, no backend: nginx serves the bundle and the vendored model.
+# No volumes (nothing is stored), no published ports (Caddy reaches it over the
+# shared proxy network as scribe:80).
+#
+# Deploy from Portainer → Stacks → Add stack → Repository, with
+# .env.example copied into the stack's environment variables.
+
+services:
+  scribe:
+    image: ghcr.io/bulaya-ute/scribe:${SCRIBE_VERSION:?set SCRIBE_VERSION in .env}
+    container_name: scribe
+    restart: unless-stopped
+    networks:
+      proxy:
+        aliases: [scribe]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+networks:
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK:-proxy}

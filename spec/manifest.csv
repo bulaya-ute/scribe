@@ -1,0 +1,23 @@
+key,value,reason
+standard,9,
+system,Scribe,
+skill,v0.19.0,producing skill version (VERSIONING promise 4)
+mode,forward,
+themes,dark,Single dark surface chosen for the tool; light theme recorded as polish.
+deploy,portainer-stack,
+polish,standard,Public consumer utility; polish opens only after MVP acceptance.
+i18n,none,English-only utility at MVP; strings inline (DEC-i18n-none).
+subspec:01-overview,active,
+subspec:02-architecture,active,
+subspec:03-data,n/a,No datastore: nothing is persisted except the browser model cache.
+subspec:04-interfaces,n/a,"No API, jobs, events or notifications; the only interface is static asset serving."
+subspec:05-effects,n/a,No server-side effects; all processing happens in the browser.
+subspec:06-use-cases,active,
+subspec:07-behaviour,active,
+subspec:08-access,n/a,Public and anonymous; no roles or permissions (DEC-public-access).
+subspec:09-configuration,active,
+subspec:10-ui,active,
+subspec:11-non-functional,active,
+subspec:12-verification,active,
+subspec:13-traceability,active,
+locales,en,Launch locale (first = default).

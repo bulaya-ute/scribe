@@ -1,0 +1,8 @@
+id,category,requirement,measure,status,source,notes
+NFR-perf,performance,A 6-second clip transcribes in under 30 seconds on a 4-core laptop with the model cached.,"Measured 10 s on the VPS browser, 2026-11-01.",accepted,owner,
+NFR-memory,performance,The tab must survive files up to the device memory limit and fail with a clear message beyond it; no artificial cap is imposed.,Ceiling to be measured per device class; recorded as an OQ until measured.,accepted,owner,
+NFR-compat,compatibility,"Runs on current Chrome, Edge, Firefox and Safari with WebAssembly; WebGPU is optional and unused at MVP.",Verified on Chromium; other engines not yet verified — recorded as a gap.,accepted,owner,
+NFR-version,other,The deployed build shows its version and keeps a changelog; the static host serves hashed assets immutably.,Version visible in the footer; changelog per release.,accepted,owner,
+NFR-obs,observability,Client failures produce a structured console error with stage and cause; no analytics or telemetry is sent anywhere.,Console-only by design; verified by the zero-external-requests check.,accepted,owner,
+NFR-security,security,"CSP restricts to self, wasm-unsafe-eval and blob workers; no third-party origins are contacted.",Header verified; external request count zero.,accepted,owner,
+NFR-a11y,accessibility,"Interactive targets are at least 44 px, focus is visible, contrast meets 4.5:1 for body text, and progress is announced via aria-live.",Checked in the build review; formal audit pending.,accepted,owner,
