@@ -1,6 +1,6 @@
 id,target,kind,given,when,then,device,status,source,notes
 ACC-transcribe-behaviour,UC-transcribe,behaviour,A visitor with a supported video file and a cached model,They drop the file and let the run finish,"A markdown transcript matching the spoken audio is shown, with copy and download enabled",desktop,accepted,owner,
-ACC-transcribe-rendered-desktop,UC-transcribe,rendered,The app open at desktop width,The processing state is reached,"Progress shows chunk n of m, elapsed/remaining and partial text; the bar advances every chunk",desktop,accepted,owner,
+ACC-transcribe-rendered-desktop,UC-transcribe,rendered,The app open at desktop width,The processing state is reached,"Progress shows chunk n of m, elapsed time and partial text; the bar advances every chunk; no time remaining is shown (RUL-progress)",desktop,accepted,owner,Reworded 2026-11-01 to match RUL-progress (remaining time is not licensed by PRAC-9).
 ACC-transcribe-rendered-tablet,UC-transcribe,rendered,The app open at tablet width,A file is processed,The same information is visible without horizontal scrolling and controls stay 44 px,tablet,accepted,owner,
 ACC-transcribe-rendered-mobile,UC-transcribe,rendered,The app open at mobile width,A file is processed,The same information is visible without horizontal scrolling and controls stay 44 px,mobile,accepted,owner,
 ACC-language,UC-choose-language,behaviour,A language is selected before the run,The transcript is produced,The markdown header names that language and the text follows it,desktop,accepted,owner,
@@ -13,3 +13,4 @@ ACC-no-upload,RUL-local-only,nfr,Any run,Processing completes,The performance lo
 ACC-cache,RUL-model-cache,nfr,A model already downloaded,The page is reloaded and a new file processed,Model requests report zero transferred bytes,desktop,accepted,owner,
 ACC-perf,NFR-perf,nfr,A 6-second clip and a cached model,The run finishes,Elapsed time is under 30 seconds on a 4-core machine,desktop,accepted,owner,
 ACC-security,NFR-security,nfr,The deployed site,Any page is served,"CSP, nosniff and noindex headers are present and no third-party origin is contacted",desktop,accepted,owner,
+ACC-theme-system,RUL-theme-system,rendered,A visitor whose OS is set to dark (or light),They open the page with no saved preference,The page renders in the matching theme; the theme toggle switches it and the choice persists across reloads,desktop,accepted,owner,
