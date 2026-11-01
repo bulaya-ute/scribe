@@ -1,7 +1,7 @@
-// Model loading and chunked transcription (RUL-chunking, RUL-model-cache, RUL-progress).
-import { TARGET_RATE } from './audio.js'
-import { trimOverlap } from './markdown.js'
-import { CODE, ScribeError, fail, looksLikeOom } from './errors.js'
+// Client for the inference worker (FLM-main-thread-block). The model and all
+// inference live in transcribe.worker.js; this module only sends PCM and
+// relays progress, so the page stays responsive during a run.
+import { CODE, fail } from './errors.js'
 
 export const MODEL_ID = 'Xenova/whisper-base'
 export const CHUNK_SECONDS = 30
@@ -19,112 +19,80 @@ export const FRIENDLY = {
   'decoder_model_merged_quantized.onnx': 'Decoder',
   'tokenizer.json': 'Tokenizer',
 }
-const EXPECTED_TOTAL = Object.values(EXPECTED_BYTES).reduce((a, b) => a + b, 0)
 
-let pending = null
+let worker = null
+let loadPromise = null
 let onDownload = null
-let loaded = null
-// Bytes per artifact, so the aggregate is a sum of real bytes, never a guess.
-const perFile = new Map()
-let downloadMax = 0 // the bar never moves backwards
+let onChunk = null
+let pending = null // { resolve, reject } for the transcribe call in flight
 
-// Loads the pipeline once per page. Later runs reuse it (UC-restart keeps the model).
-export function loadTranscriber({ onProgress } = {}) {
-  if (loaded) return Promise.resolve(loaded)
-  onDownload = onProgress ?? null
-  if (!pending) {
-    pending = (async () => {
-      if (typeof WebAssembly === 'undefined') throw fail(CODE.WASM_BLOCKED)
-      const { pipeline, env } = await import('@huggingface/transformers')
-      env.allowLocalModels = true
-      env.allowRemoteModels = false
-      env.localModelPath = '/models/'
-      env.backends.onnx.wasm.numThreads = 1
-      env.backends.onnx.wasm.wasmPaths = '/ort/'
-      const tr = await pipeline('automatic-speech-recognition', MODEL_ID, {
-        dtype: 'q8',
-        device: 'wasm',
-        progress_callback: handleProgress,
-      })
-      loaded = tr
-      return tr
-    })().catch((err) => {
+function toScribeError(m) {
+  const text = String(m.message || '')
+  if (/WebAssembly/i.test(text)) return fail(CODE.WASM_BLOCKED, { detail: text })
+  if (/memory|allocation|out of bounds/i.test(text)) return fail(CODE.OOM, { detail: text })
+  return fail(CODE.MODEL_DOWNLOAD, { detail: text })
+}
+
+function getWorker() {
+  if (worker) return worker
+  if (typeof Worker === 'undefined' || typeof WebAssembly === 'undefined') {
+    throw fail(CODE.WASM_BLOCKED)
+  }
+  worker = new Worker(new URL('./transcribe.worker.js', import.meta.url), { type: 'module' })
+  worker.onmessage = (e) => {
+    const m = e.data
+    if (m.type === 'progress') onDownload?.({ row: m.row, pct: m.pct, totalBytes: m.totalBytes })
+    else if (m.type === 'chunk') onChunk?.(m)
+    else if (m.type === 'done') {
+      const p = pending
       pending = null
-      if (err instanceof ScribeError) throw err
-      if (typeof WebAssembly === 'undefined' || /WebAssembly/i.test(String(err?.message))) {
-        throw fail(CODE.WASM_BLOCKED, { cause: err })
+      p?.resolve(m.chunks)
+    } else if (m.type === 'error') {
+      const p = pending
+      pending = null
+      p?.reject(toScribeError(m))
+    }
+  }
+  worker.onerror = (ev) => {
+    const p = pending
+    pending = null
+    p?.reject(fail(CODE.WASM_BLOCKED, { detail: ev.message }))
+  }
+  return worker
+}
+
+// Loads the model inside the worker once per page; later runs reuse it (UC-restart).
+export function loadTranscriber({ onProgress } = {}) {
+  onDownload = onProgress ?? null
+  if (!loadPromise) {
+    loadPromise = new Promise((resolve, reject) => {
+      const w = getWorker()
+      const forward = w.onmessage
+      w.onmessage = (e) => {
+        if (e.data.type === 'ready') {
+          w.onmessage = forward
+          resolve({ ready: true })
+        } else if (e.data.type === 'error') {
+          w.onmessage = forward
+          loadPromise = null
+          reject(toScribeError(e.data))
+        } else {
+          forward(e)
+        }
       }
-      throw fail(CODE.MODEL_DOWNLOAD, { cause: err, detail: String(err?.message || err) })
+      w.postMessage({ type: 'load' })
     })
   }
-  return pending
+  return loadPromise
 }
 
-function handleProgress(p) {
-  if (!p || !onDownload) return
-  if (p.status !== 'progress' || typeof p.loaded !== 'number') return
-  const base = String(p.file || '').split('/').pop()
-  if (!(base in EXPECTED_BYTES)) return
-  const total = EXPECTED_BYTES[base]
-  const got = Math.min(p.loaded, total)
-  perFile.set(base, got)
-  let sum = 0
-  for (const v of perFile.values()) sum += v
-  downloadMax = Math.max(downloadMax, Math.min(100, (sum / EXPECTED_TOTAL) * 100))
-  onDownload({ row: { file: base, loaded: got, total }, pct: downloadMax, totalBytes: EXPECTED_TOTAL })
-}
-
-// Splits the audio into 30 s chunks with a 3 s lead-in overlap, transcribes each,
-// trims the duplicated seam words, and yields to the event loop between chunks
-// so progress paints (FLM-main-thread-block).
-export async function transcribeChunked(transcriber, pcm, { language, onChunk }) {
-  const span = CHUNK_SECONDS * TARGET_RATE
-  const overlap = OVERLAP_SECONDS * TARGET_RATE
-  const total = Math.max(1, Math.ceil(pcm.length / span))
-  const chunks = []
-  let partial = ''
-  let prevText = ''
-
-  for (let i = 0; i < total; i++) {
-    const start = Math.max(0, i * span - (i ? overlap : 0))
-    const end = Math.min(pcm.length, (i + 1) * span)
-    const offset = start / TARGET_RATE
-    const keepFrom = i ? (i * span) / TARGET_RATE - 0.4 : 0
-
-    let res
-    try {
-      res = await transcriber(pcm.subarray(start, end), {
-        return_timestamps: true,
-        language: language || undefined,
-        task: 'transcribe',
-      })
-    } catch (err) {
-      if (looksLikeOom(err)) throw fail(CODE.OOM, { detail: String(err?.message || err) })
-      throw err
-    }
-
-    const pieces = Array.isArray(res?.chunks)
-      ? res.chunks
-      : [{ text: res?.text || '', timestamp: [0, (end - start) / TARGET_RATE] }]
-
-    const kept = []
-    for (const p of pieces) {
-      const t1 = (p.timestamp?.[1] ?? (end - start) / TARGET_RATE) + offset
-      const text = (p.text || '').trim()
-      if (!text) continue
-      if (i && t1 <= keepFrom) continue // wholly inside the lead-in overlap
-      kept.push(text)
-    }
-    const raw = kept.join(' ')
-    const text = i ? trimOverlap(prevText, raw) : raw.trim()
-    chunks.push({ index: i, start: i * CHUNK_SECONDS, text })
-    if (text) {
-      partial += (partial ? ' ' : '') + text
-    }
-    prevText = raw || prevText
-
-    onChunk?.({ done: i + 1, total, text: partial, endSec: end / TARGET_RATE })
-    await new Promise((resolve) => setTimeout(resolve, 30))
-  }
-  return chunks
+// Runs chunked transcription in the worker. Resolves with the chunk list.
+export function transcribeChunked(_handle, pcm, { language, onChunk: cb }) {
+  onChunk = cb ?? null
+  return new Promise((resolve, reject) => {
+    pending = { resolve, reject }
+    // Copy the samples and transfer the copy, so the caller's buffer is untouched.
+    const copy = new Float32Array(pcm)
+    getWorker().postMessage({ type: 'transcribe', pcm: copy, language }, [copy.buffer])
+  })
 }

@@ -2,7 +2,7 @@ import './tokens.css'
 import './styles.css'
 import { extractAudio } from './audio.js'
 import { loadTranscriber, transcribeChunked, EXPECTED_BYTES, FRIENDLY } from './transcribe.js'
-import { buildMarkdown, baseNameOf, fmtClock, prettyBytes, UNSUPPORTED_LANGUAGES, languageName } from './markdown.js'
+import { buildMarkdown, baseNameOf, fmtClock, prettyBytes, languageName } from './markdown.js'
 import { CODE, ScribeError, fail, classify } from './errors.js'
 import { logFailure } from './log.js'
 
@@ -404,9 +404,7 @@ els.again.addEventListener('click', () => {
   els.pick.focus()
 })
 
-// Unsupported model languages are disabled in the select; guard anyway.
 els.language.addEventListener('change', () => {
-  if (UNSUPPORTED_LANGUAGES.has(els.language.value)) els.language.value = 'auto'
 })
 
 initTheme()

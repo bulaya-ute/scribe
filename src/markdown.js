@@ -9,16 +9,13 @@ export const LANGUAGES = [
   { code: 'fr', name: 'French' },
   { code: 'pt', name: 'Portuguese' },
   { code: 'sw', name: 'Swahili' },
-  { code: 'ny', name: 'Chichewa' },
-  { code: 'bem', name: 'Bemba' },
   { code: 'es', name: 'Spanish' },
   { code: 'de', name: 'German' },
 ]
 
-// Languages the Whisper base tokenizer has no language token for. A run in one
-// of these would silently fall back to detection, so the UI refuses it instead.
-// Recorded in spec/13-traceability/open-questions.csv (OQ-whisper-languages).
-export const UNSUPPORTED_LANGUAGES = new Set(['ny', 'bem'])
+// Chichewa (ny) and Bemba (bem) are not offered: Whisper base has no language
+// token for either, so a run would silently fall back to detection.
+// Decision: spec/13-traceability/open-questions.csv (OQ-whisper-languages).
 
 export function languageName(code) {
   return LANGUAGES.find((l) => l.code === code)?.name ?? code
