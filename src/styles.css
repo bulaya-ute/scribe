@@ -189,7 +189,7 @@ body {
   color: var(--fg);
   font: 500 14px/1 var(--sans);
   padding: 11px 16px;
-  min-height: 42px;
+  min-height: 44px;
   border-radius: 10px;
   cursor: pointer;
   transition: background 140ms ease, border-color 140ms ease, transform 100ms ease;
@@ -236,7 +236,7 @@ select {
   border-radius: 10px;
   padding: 10px 34px 10px 12px;
   font: 500 14px var(--sans);
-  min-height: 42px;
+  min-height: 44px;
   cursor: pointer;
 }
 
@@ -247,7 +247,7 @@ select {
   font-size: 14px;
   color: var(--fg-2);
   cursor: pointer;
-  min-height: 42px;
+  min-height: 44px;
 }
 
 .check input { width: 17px; height: 17px; accent-color: var(--brand); cursor: pointer; }

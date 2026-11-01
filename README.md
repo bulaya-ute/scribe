@@ -46,10 +46,8 @@ npm run dev
 
 Recorded in the spec, not hidden here:
 
-- Transcription progress is not wired: the bar reflects model download only, so a
-  long run looks stuck (`RUL-progress`, `DEC-progress-shape`).
-- The ffmpeg.wasm fallback decoder starts and never completes for containers the
-  browser cannot decode (`FLM-fallback-hang`, `ACC-recover-decode` fails).
+- Transcription runs on the main thread, so the page stalls for a few seconds per
+  30 s chunk. Progress still paints between chunks (`FLM-main-thread-block`).
 
 ## Licence
 

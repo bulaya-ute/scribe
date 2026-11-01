@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.1.1 — 2026-11-01
+
+**Touch targets.** Choose file, Language and Include timestamps are 44 px high
+(was 42 px), meeting the target size in `spec/10-ui/ui-conventions.md`.
+
 ## v1.1.0 — 2026-11-01
 
 **You can see it working.** Transcription is now chunked (30 s, 3 s overlap) with
