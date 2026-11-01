@@ -3,7 +3,7 @@ standard,9,
 system,Scribe,
 skill,v0.19.0,producing skill version (VERSIONING promise 4)
 mode,forward,
-themes,dark,Single dark surface chosen for the tool; light theme recorded as polish.
+themes,system,"Light and dark, following the OS preference by default (owner, 2026-11-01)."
 deploy,portainer-stack,
 polish,standard,Public consumer utility; polish opens only after MVP acceptance.
 i18n,none,English-only utility at MVP; strings inline (DEC-i18n-none).

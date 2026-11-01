@@ -13,3 +13,4 @@ ACC-no-upload,RUL-local-only,nfr,Any run,Processing completes,The performance lo
 ACC-cache,RUL-model-cache,nfr,A model already downloaded,The page is reloaded and a new file processed,Model requests report zero transferred bytes,desktop,accepted,owner,
 ACC-perf,NFR-perf,nfr,A 6-second clip and a cached model,The run finishes,Elapsed time is under 30 seconds on a 4-core machine,desktop,accepted,owner,
 ACC-security,NFR-security,nfr,The deployed site,Any page is served,"CSP, nosniff and noindex headers are present and no third-party origin is contacted",desktop,accepted,owner,
+ACC-theme-system,RUL-theme-system,rendered,A visitor whose OS is set to dark (or light),They open the page with no saved preference,The page renders in the matching theme; the theme toggle switches it and the choice persists across reloads,desktop,accepted,owner,
