@@ -11,7 +11,16 @@ env.backends.onnx.wasm.wasmPaths = '/ort/'
 
 const MODEL_ID = 'Xenova/whisper-base'
 const TARGET_RATE = 16000
-const MAX_BYTES = 500 * 1024 * 1024
+// RUL-chunking: 30 s slices with a 3 s overlap; the overlap is trimmed at the seam.
+const CHUNK_SECONDS = 30
+const OVERLAP_SECONDS = 3
+// Known artifact sizes, so the download bar is measured against a fixed total
+// and can never move backwards when a second file starts streaming.
+const EXPECTED_BYTES = {
+  'encoder_model_quantized.onnx': 23200850,
+  'decoder_model_merged_quantized.onnx': 53707539,
+  'tokenizer.json': 2480466,
+}
 
 const $ = (id) => document.getElementById(id)
 const dropzone = $('dropzone')
@@ -31,6 +40,9 @@ const metaEl = $('meta')
 const languageSel = $('language')
 const timestampsChk = $('timestamps')
 const downloadsEl = $('downloads')
+const partialEl = $('partial')
+const versionEl = $('version')
+if (versionEl) versionEl.textContent = `v${__APP_VERSION__}`
 
 // Human names for the model artifacts transformers.js streams in parallel.
 const FRIENDLY = {
@@ -44,12 +56,15 @@ const FRIENDLY = {
 }
 
 const dlRows = new Map() // file -> { li, size, fill, loaded, total, lastPaint }
+const expectedTotalBytes = Object.values(EXPECTED_BYTES).reduce((a, b) => a + b, 0)
+let downloadPctMax = 0
 
 const mb = (n) => `${(n / 1024 ** 2).toFixed(1)} MB`
 
 function resetDownloads() {
   downloadsEl.innerHTML = ''
   dlRows.clear()
+  downloadPctMax = 0
 }
 
 // One row per artifact, each with its own bar. Updates are throttled per row so
@@ -102,15 +117,17 @@ function updateDownloadRow(file, loaded, total) {
   if (finished) row.li.classList.add('done')
 }
 
-// Aggregate across all artifacts seen so far, so the main bar never jumps back.
+// Aggregate against the known artifact total, so the bar is measured against
+// real bytes and never regresses when the decoder starts after the encoder.
 function overallDownloadPct() {
   let loaded = 0
-  let total = 0
-  for (const row of dlRows.values()) {
-    loaded += row.loaded
-    total += row.total
+  for (const [key, row] of dlRows) {
+    const total = row.total || EXPECTED_BYTES[key.split('/').pop()] || 0
+    loaded += total ? Math.min(row.loaded, total) : row.loaded
   }
-  return total > 0 ? (loaded / total) * 100 : 0
+  const pct = Math.min(100, (loaded / expectedTotalBytes) * 100)
+  downloadPctMax = Math.max(downloadPctMax, pct)
+  return downloadPctMax
 }
 
 let transcriber = null
@@ -138,6 +155,7 @@ function showError(msg) {
   errorBox.textContent = msg
   errorBox.hidden = false
   statusBox.hidden = true
+  partialEl.hidden = true
   running = false
 }
 
@@ -162,6 +180,13 @@ const prettyBytes = (n) =>
     : `${(n / 1024 ** 2).toFixed(n > 10 * 1024 ** 2 ? 0 : 1)} MB`
 
 /* ── audio extraction ────────────────────────────────────── */
+function withTimeout(promise, ms, message) {
+  let timer
+  const guard = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(message)), ms)
+  })
+  return Promise.race([promise, guard]).finally(() => clearTimeout(timer))
+}
 async function extractWithWebAudio(file) {
   const ctx = new (window.AudioContext || window.webkitAudioContext)()
   try {
@@ -186,25 +211,40 @@ async function extractWithFFmpeg(file) {
   ff.on('log', ({ message }) => {
     if (message && /time=/.test(message)) statusNote.textContent = message.slice(0, 140)
   })
-  await ff.load({
-    coreURL: '/ffmpeg/ffmpeg-core.js',
-    wasmURL: '/ffmpeg/ffmpeg-core.wasm',
-    classWorkerURL: '/ffmpeg/worker.js',
-  })
-  const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '')
-  const inName = `input.${ext}`
-  await ff.writeFile(inName, await fetchFile(file))
-  await ff.exec(['-i', inName, '-vn', '-ac', '1', '-ar', String(TARGET_RATE), '-f', 'wav', 'out.wav'])
-  const wav = await ff.readFile('out.wav')
-  await ff.deleteFile(inName).catch(() => {})
-  await ff.deleteFile('out.wav').catch(() => {})
-  ff.terminate()
+  // No classWorkerURL: the package resolves its own worker through the bundler,
+  // which also emits the worker's imports (./const.js, ./errors.js). A
+  // hand-copied worker.js loads but never answers, which is why this path hung.
+  const execBudget = Math.min(15 * 60_000, Math.max(120_000, (file.size / 1024 ** 2) * 4000))
+  try {
+    await withTimeout(
+      ff.load({ coreURL: '/ffmpeg/ffmpeg-core.js', wasmURL: '/ffmpeg/ffmpeg-core.wasm' }),
+      120_000,
+      'The fallback decoder did not start in time',
+    )
+    const ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '')
+    const inName = `input.${ext}`
+    await ff.writeFile(inName, await fetchFile(file))
+    await withTimeout(
+      ff.exec(['-i', inName, '-vn', '-ac', '1', '-ar', String(TARGET_RATE), '-f', 'wav', 'out.wav']),
+      execBudget,
+      'The fallback decoder stopped responding',
+    )
+    const wav = await ff.readFile('out.wav')
+    await ff.deleteFile(inName).catch(() => {})
+    await ff.deleteFile('out.wav').catch(() => {})
 
-  const bytes = wav.buffer ?? wav
-  const ctx = new (window.AudioContext || window.webkitAudioContext)()
-  const decoded = await ctx.decodeAudioData(bytes.slice(0).buffer)
-  ctx.close?.()
-  return { pcm: decoded.getChannelData(0), duration: decoded.duration }
+    // readFile returns a Uint8Array — pass a real ArrayBuffer slice to Web Audio.
+    const bytes = wav instanceof Uint8Array ? wav : new Uint8Array(wav)
+    const ab = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)
+    // decodeAudioData resamples to the context rate — pin it to 16 kHz, or
+    // Whisper receives 48 kHz audio and emits noise ("[Breathing]").
+    const ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: TARGET_RATE })
+    const decoded = await ctx.decodeAudioData(ab)
+    ctx.close?.()
+    return { pcm: decoded.getChannelData(0), duration: decoded.duration }
+  } finally {
+    try { ff.terminate() } catch {}
+  }
 }
 
 async function extractAudio(file) {
@@ -250,7 +290,72 @@ async function getTranscriber() {
 }
 
 
+/* ── transcription: 30 s chunks, measured progress ───────── */
+function normaliseWords(s) {
+  return s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(Boolean)
+}
+
+// Drop the words a chunk repeats from the tail of the previous one (the 3 s overlap).
+function trimOverlap(prevText, nextText) {
+  const a = normaliseWords(prevText).slice(-14)
+  const b = normaliseWords(nextText).slice(0, 14)
+  const limit = Math.min(a.length, b.length)
+  for (let n = limit; n >= 4; n--) {
+    if (a.slice(-n).join(' ') === b.slice(0, n).join(' ')) {
+      return nextText.trim().split(/\s+/).slice(n).join(' ')
+    }
+  }
+  return nextText.trim()
+}
+
+async function transcribeChunked(transcriber, pcm, duration, { language, onProgress }) {
+  const span = CHUNK_SECONDS * TARGET_RATE
+  const overlap = OVERLAP_SECONDS * TARGET_RATE
+  const total = Math.max(1, Math.ceil(pcm.length / span))
+  const pieces = []
+  let textSoFar = ''
+
+  for (let i = 0; i < total; i++) {
+    const start = Math.max(0, i * span - (i ? overlap : 0))
+    const end = Math.min(pcm.length, (i + 1) * span)
+    const offset = start / TARGET_RATE
+    const keepFrom = i ? (i * span) / TARGET_RATE - 0.4 : 0
+
+    const res = await transcriber(pcm.subarray(start, end), {
+      return_timestamps: true,
+      language: language || undefined,
+      task: 'transcribe',
+    })
+    const slice = Array.isArray(res.chunks)
+      ? res.chunks
+      : [{ text: res.text || '', timestamp: [0, (end - start) / TARGET_RATE] }]
+
+    for (const p of slice) {
+      const t0 = (p.timestamp?.[0] ?? 0) + offset
+      const t1 = (p.timestamp?.[1] ?? (end - start) / TARGET_RATE) + offset
+      const text = (p.text || '').trim()
+      if (!text) continue
+      if (i && t1 <= keepFrom) continue // wholly inside the overlap
+      const prev = pieces[pieces.length - 1]
+      const cleaned = prev ? trimOverlap(prev.text, text) : text
+      if (!cleaned) continue
+      pieces.push({ text: cleaned, timestamp: [t0, t1] })
+      textSoFar += (textSoFar ? ' ' : '') + cleaned
+    }
+
+    onProgress?.({ done: i + 1, total, text: textSoFar, endSec: end / TARGET_RATE })
+    // Inference blocks the main thread; hand the browser a macrotask so the
+    // progress update actually paints before the next chunk starts.
+    await new Promise((resolve) => setTimeout(resolve, 30))
+  }
+  return pieces
+}
+
 /* ── markdown assembly ───────────────────────────────────── */
+function outputLanguage() {
+  return languageSel.value || 'auto'
+}
+
 function buildMarkdown({ name, chunks, duration, language, withTimestamps }) {
   const title = name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim() || 'Transcript'
   const lines = [
@@ -290,11 +395,12 @@ async function run(file) {
   resetDownloads()
   stepsEl.querySelectorAll('li').forEach((li) => li.classList.remove('active', 'done'))
 
-  if (file.size > MAX_BYTES) {
-    showError(`That file is ${prettyBytes(file.size)}. The limit is 500 MB — trim it or extract the audio first.`)
-    return
+  // RUL-no-size-cap: no artificial limit. Warn only when the file is large
+  // against what this device reports, then attempt it and fail honestly.
+  const memGb = navigator.deviceMemory
+  if (memGb && file.size > memGb * 1024 ** 3 * 0.4) {
+    statusNote.textContent = `Large file (${prettyBytes(file.size)}) on a device reporting ${memGb} GB of memory — if the tab runs out, try a shorter clip.`
   }
-
   baseName = (file.name || 'transcript').replace(/\.[^.]+$/, '') || 'transcript'
   const started = performance.now()
 
@@ -304,36 +410,29 @@ async function run(file) {
     const transcriber = await getTranscriber()
 
     setStep('transcribe', 'active')
-    let lastPct = 0
-    const chunks = []
+    partialEl.hidden = false
+    partialEl.textContent = ''
+    const transcribeStarted = performance.now()
 
-    const output = await transcriber(pcm, {
-      chunk_length_s: 30,
-      stride_length_s: 5,
-      return_timestamps: true,
+    const chunks = await transcribeChunked(transcriber, pcm, duration, {
       language: languageSel.value || undefined,
-      task: 'transcribe',
-      callback_function: (beams) => {
-        // Progress is proportion of processed chunks against total duration.
-        const end = beams?.[0]?.timestamp?.[1] ?? null
-        if (end != null && duration > 0) {
-          lastPct = Math.min(99, (end / duration) * 100)
-          setProgress(lastPct, `Transcribing · ${fmtClock(end)} of ${fmtClock(duration)}`)
-        }
+      onProgress: ({ done, total, text, endSec }) => {
+        const elapsed = (performance.now() - transcribeStarted) / 1000
+        setProgress((done / total) * 100, `Transcribing · chunk ${done} of ${total} · ${fmtClock(elapsed)} elapsed`)
+        partialEl.textContent = text.length > 900 ? `…${text.slice(-900)}` : text
+        statusNote.textContent = `Processed ${fmtClock(endSec)} of ${fmtClock(duration)} of audio.`
       },
     })
 
-    if (Array.isArray(output.chunks)) chunks.push(...output.chunks)
-    else if (output.text) chunks.push({ text: output.text, timestamp: [0, duration] })
-
     setStep('transcribe', 'done')
     setProgress(100, 'Done')
+    partialEl.hidden = true
 
     markdown = buildMarkdown({
       name: file.name,
       chunks,
       duration,
-      language: output.language || languageSel.value || '',
+      language: outputLanguage(),
       withTimestamps: timestampsChk.checked,
     })
 
@@ -364,6 +463,8 @@ async function run(file) {
     const msg = String(err?.message || err)
     if (/memory|allocation|out of bounds|OOM/i.test(msg)) {
       showError('Ran out of memory while processing. Try a shorter clip, or extract the audio track first.')
+    } else if (/did not start|stopped responding|timeout/i.test(msg)) {
+      showError(`${msg}. Try MP4 (H.264/AAC), MOV or M4A — or extract the audio track with another tool.`)
     } else if (/decode|codec/i.test(msg)) {
       showError('Could not decode that file’s audio. Try MP4 (H.264/AAC), MOV, WebM or M4A.')
     } else {

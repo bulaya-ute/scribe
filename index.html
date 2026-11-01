@@ -44,7 +44,7 @@
               <path d="M14 24l6 6 8-10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <p id="drop-title" class="dz-title">Drop a video here</p>
-            <p id="drop-help" class="dz-help">MP4, MOV, WebM, MKV, M4A, MP3, WAV · up to 500 MB</p>
+            <p id="drop-help" class="dz-help">MP4, MOV, WebM, MKV, M4A, MP3, WAV · nothing is uploaded</p>
             <button id="pick" class="btn btn-primary" type="button">Choose a file</button>
             <input id="file" type="file" accept="video/*,audio/*,.mkv,.m4a,.mp3,.wav,.mov" hidden />
           </div>
@@ -84,6 +84,7 @@
               <li data-step="transcribe">Transcribe</li>
             </ol>
             <ul class="downloads" id="downloads" aria-label="Model files"></ul>
+            <pre class="partial" id="partial" aria-live="polite" hidden></pre>
             <p class="status-note" id="status-note">
               First run downloads the speech model (~77 MB, cached afterwards).
             </p>
@@ -115,7 +116,8 @@
           <article>
             <h3>What to expect</h3>
             <p>Transcription runs faster than real time on a laptop, slower on a phone.
-            Very long videos (over ~45 minutes) can run out of tab memory — split them first.</p>
+            There is no file-size cap: very long videos are limited only by the memory of
+            your tab, so on a low-memory device split them first.</p>
           </article>
           <article>
             <h3>Accuracy</h3>
@@ -127,7 +129,7 @@
 
       <footer class="foot">
         <span>No uploads · no cookies · no tracking</span>
-        <span class="foot-model">model: whisper-base (q8) · ~77 MB, cached</span>
+        <span class="foot-model">model: whisper-base (q8) · ~77 MB, cached · <span id="version">dev</span></span>
       </footer>
     </div>
     <script type="module" src="/src/main.js"></script>
