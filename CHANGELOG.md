@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.3.0 — 2026-11-01
+
+**Rebuilt UI (ui-v3-build).** Layout, states and error handling rebuilt from the stamped spec.
+
+- Every error shows a plain message, the cause where known, and a support code.
+- Copy, Download .md and Start over appear only once a transcript exists.
+- Copy / Download / Start over form one aligned group on desktop and tablet.
+- Desktop uses the window width (page max 1600 px); transcript text capped at about 80 characters per line.
+- Language list: auto, English, French, Portuguese, Swahili, Spanish, German. Chichewa and Bemba removed
+  (OQ-whisper-languages).
+- Inference in a Web Worker; progress is measured by bytes and chunks; no ETA.
+- Light and dark themes with a visible toggle (RUL-theme-system). Self-hosted system fonts; no third-party origins.
+
 ## v1.1.1 — 2026-11-01
 
 **Touch targets.** Choose file, Language and Include timestamps are 44 px high

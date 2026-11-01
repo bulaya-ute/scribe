@@ -24,7 +24,11 @@ a blank panel with no stage name while work is running.
 
 ## Layout
 
-- Single column, max 760 px, one primary action at a time.
+- One card, one primary action at a time. Desktop (≥1024 px): page max-width 1600 px so the
+  window width is used; transcript preview capped at about 80 characters per line
+  (DEC-ui-v3-layout). Tablet and phone: fluid, full width inside the page margin.
+- Transcript actions (Copy, Download .md, Start over) form one aligned group and exist only
+  once a transcript exists (DEC-ui-v3-actions).
 - Device classes: desktop (≥1024), tablet (768–1023), mobile (<768) — the same
   information must be visible at all three without horizontal scrolling.
 

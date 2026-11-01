@@ -1,0 +1,65 @@
+/* Design tokens (ui-ux-pro-max palette, system font stack, no third-party origins).
+   Light is the default; dark applies by OS preference or by the visitor's saved choice
+   (data-theme set by main.js overrides the media query). Body text >= 4.5:1 in both. */
+
+:root {
+  color-scheme: light;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --fg: #0f172a;          /* 17.9:1 on --bg */
+  --fg-muted: #475569;    /* 7.6:1 on --bg, 7.9:1 on --surface */
+  --border: #cbd5e1;
+  --accent: #15803d;      /* primary button fill; white text 5.0:1 */
+  --accent-fg: #ffffff;
+  --accent-soft: #dcfce7;
+  --focus: #15803d;
+  --danger: #b91c1c;      /* 6.5:1 on --surface */
+  --danger-soft: #fef2f2;
+  --danger-border: #fca5a5;
+  --bar-track: #e2e8f0;
+  --radius: 14px;
+  --radius-sm: 10px;
+  --target: 44px;
+  --gap: 16px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0f172a;
+    --surface: #1b2336;
+    --surface-2: #232d44;
+    --fg: #f8fafc;          /* 17.1:1 on --bg */
+    --fg-muted: #b6c2d4;    /* 9.6:1 on --surface */
+    --border: #475569;
+    --accent: #22c55e;
+    --accent-fg: #0f172a;
+    --accent-soft: #14372a;
+    --focus: #4ade80;
+    --danger: #fca5a5;      /* 9.2:1 on --surface */
+    --danger-soft: #3a1d24;
+    --danger-border: #7f1d1d;
+    --bar-track: #334155;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f172a;
+  --surface: #1b2336;
+  --surface-2: #232d44;
+  --fg: #f8fafc;
+  --fg-muted: #b6c2d4;
+  --border: #475569;
+  --accent: #22c55e;
+  --accent-fg: #0f172a;
+  --accent-soft: #14372a;
+  --focus: #4ade80;
+  --danger: #fca5a5;
+  --danger-soft: #3a1d24;
+  --danger-border: #7f1d1d;
+  --bar-track: #334155;
+}

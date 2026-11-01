@@ -23,6 +23,10 @@ scribe/
 
 One deployable, one repo: the spec and the deployment live here too (DEC-2).
 
+## Verification
+
+See `docs/ui-v3-verification.md` for what was run and what is still unverified.
+
 ## Develop
 
 ```bash
@@ -46,8 +50,8 @@ npm run dev
 
 Recorded in the spec, not hidden here:
 
-- Transcription runs on the main thread, so the page stalls for a few seconds per
-  30 s chunk. Progress still paints between chunks (`FLM-main-thread-block`).
+- Inference runs in a dedicated Web Worker (`FLM-main-thread-block` fixed in v1.3.0).
+  Remaining gap: the ffmpeg.wasm fallback is verified only with one AVI sample.
 
 ## Licence
 
