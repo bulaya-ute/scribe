@@ -1,0 +1,2 @@
+id,container,node,ports,volumes,env,image,networks,status,source,notes
+DEP-vps,CNT-web,"vps (Docker, proxy network)",none published,,none,ghcr.io/bulaya-ute/scribe:${SCRIBE_VERSION},proxy,accepted,owner,

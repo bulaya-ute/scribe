@@ -1,0 +1,20 @@
+at,by,item,status,evidence,note
+2026-11-01T16:50:00.268927+00:00,hermes,ACC-transcribe-behaviour,verified,scribe v1.1.0 prod run: MP4 6s clip -> correct markdown (2026-11-01),
+2026-11-01T16:50:00.352879+00:00,hermes,ACC-recover-decode,verified,"scribe v1.1.0 prod: AVI via ffmpeg.wasm -> correct markdown, 10.5s (2026-11-01)",
+2026-11-01T16:50:00.453895+00:00,hermes,ACC-restart,verified,"scribe v1.1.0 prod: Start over resets form, controls idle (2026-11-01)",
+2026-11-01T16:50:00.548756+00:00,hermes,ACC-copy,verified,scribe v1.1.0 prod: clipboard holds 177-char markdown after Copy (2026-11-01),
+2026-11-01T16:50:00.636627+00:00,hermes,ACC-download,verified,"scribe v1.1.0 prod: scribe_test.md saved, 180 bytes, correct header (2026-11-01)",
+2026-11-01T16:50:00.720626+00:00,hermes,ACC-cache,verified,scribe v1.1.0 prod: 7 model files in Cache Storage; fresh-load run made no model network requests (2026-11-01). Timing-based check only.,
+2026-11-01T16:50:00.814627+00:00,hermes,ACC-security,verified,"curl -I https://scribe.bulaya.dev: CSP, nosniff, noindex, referrer-policy present (2026-11-01)",
+2026-11-01T16:50:00.896419+00:00,hermes,ACC-transcribe-rendered-tablet,partial,,834px: no horizontal overflow; 3 controls 42px (<44). Screenshot not captured.
+2026-11-01T16:50:00.979052+00:00,hermes,ACC-transcribe-rendered-mobile,partial,,390px: no horizontal overflow; 3 controls 42px (<44). Screenshot not captured.
+2026-11-01T16:50:01.111093+00:00,hermes,ACC-transcribe-rendered-desktop,partial,,1280px desktop run verified; progress paints per chunk (33/67/100%). Screenshot not captured.
+2026-11-01T16:50:01.206635+00:00,hermes,ACC-no-upload,pending,,
+2026-11-01T16:50:01.300920+00:00,hermes,ACC-language,pending,,
+2026-11-01T16:50:01.395794+00:00,hermes,ACC-timestamps,pending,,
+2026-11-01T16:50:01.488904+00:00,hermes,ACC-perf,pending,,
+2026-11-01T16:50:01.572744+00:00,hermes,ACC-transcribe-behaviour,verified,x,
+2026-11-01T16:50:13.163617+00:00,hermes,ACC-transcribe-behaviour,verified,"CORRECTION: the entry with evidence 'x' (16:50:01) was a stray command with placeholder evidence and is invalid. Valid evidence: scribe v1.1.0 prod run, MP4 6s clip -> correct markdown (2026-11-01)",
+2026-11-01T17:16:41.786634+00:00,hermes,ACC-transcribe-rendered-desktop,verified,"scribe v1.1.1 prod, 1280px: layout intact, Choose-file visible, controls 44px (vision review of screenshot; 2026-11-01)",
+2026-11-01T17:16:41.857115+00:00,hermes,ACC-transcribe-rendered-tablet,verified,"scribe v1.1.1 prod, 834px: no overflow, controls visible and not overlapping, footer v1.1.1 (vision review; 2026-11-01)",
+2026-11-01T17:16:41.929107+00:00,hermes,ACC-transcribe-rendered-mobile,verified,"scribe v1.1.1 prod, 390px: no overflow, Choose-file fully visible, controls on one row (vision review; 2026-11-01)",

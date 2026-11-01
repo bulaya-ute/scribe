@@ -1,0 +1,2 @@
+id,name,kind,technology,responsibility,status,source,notes
+CNT-web,scribe-web,web,"nginx 1.27-alpine, static files","Serve the app shell, JS/CSS, vendored model, ffmpeg and ONNX runtime assets; store and process nothing.",accepted,owner,

@@ -1,0 +1,8 @@
+id,screen,field,type,default,changed_by,effect,loading_pattern,status,source,notes
+SST-phase,SCR-main,phase,enum:idle|decoding|loading-model|transcribing|done|error,idle,file selection and run progress,Drives which panel is visible and which step is active.,progress,accepted,owner,
+SST-file,SCR-main,file,File|null,null,"choose button, drop event",Names the output file and is the input to the run.,,accepted,owner,
+SST-language,SCR-main,language,enum,auto,language select,Passed to the transcriber.,,accepted,owner,
+SST-timestamps,SCR-main,timestamps,boolean,true,checkbox,Chooses the transcript layout.,,accepted,owner,
+SST-progress,SCR-main,progress,"{stage,done,total,pct,elapsed}",null,model download and chunk callbacks,"Renders the stage name, chunk counter, measured percentage and elapsed time; partial text accumulates per chunk.",progress,accepted,owner,
+SST-transcript,SCR-main,transcript,string,,successful run,Rendered in the preview and used by copy/download.,progress,accepted,owner,
+SST-error,SCR-main,error,string,,failed run,Rendered as an actionable message.,blocking-overlay,accepted,owner,

@@ -1,0 +1,13 @@
+id,item,decision,covers,reason,ruled_by,status,source,notes
+SCOPE-local-file,Transcribe a local video or audio file the visitor chooses or drops,in,,Core capability.,owner,accepted,owner,
+SCOPE-markdown,Produce a markdown transcript with optional timestamps,in,,Core output.,owner,accepted,owner,
+SCOPE-language,Language selection and automatic detection,in,,Accuracy control.,owner,accepted,owner,
+SCOPE-copy-download,Copy to clipboard and download as .md,in,,Delivery of the result.,owner,accepted,owner,
+SCOPE-cache,Reuse the downloaded model across visits,in,,Avoids a 77 MB download on every visit.,owner,accepted,owner,
+SCOPE-url-fetch,Paste a remote video URL and fetch it,out,,Cross-origin restrictions make it unreliable; the promise is that files never leave the device.,owner,accepted,owner,
+SCOPE-upload,"Server-side upload, storage or job queue",out,,Explicit product promise: nothing is uploaded.,owner,accepted,owner,
+SCOPE-accounts,"Accounts, login and quotas",out,,Public anonymous tool.,owner,accepted,owner,
+SCOPE-diarisation,Speaker separation,deferred,,Needs a different model and UI; recorded as polish.,owner,accepted,inferred,
+SCOPE-gpu,WebGPU acceleration,deferred,,Owner deferred; needs a second weight set and a device picker.,owner,accepted,owner,
+SCOPE-i18n,Translated interface,deferred,,Single-language utility at MVP.,owner,accepted,inferred,
+SCOPE-editing,In-app transcript editing,out,,The markdown file is the editing surface.,owner,accepted,inferred,

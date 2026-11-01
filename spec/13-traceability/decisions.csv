@@ -1,0 +1,12 @@
+id,decision,rationale,alternatives,ruled_by,date,status,source,notes
+DEC-client-only,No server-side processing: decoding and transcription happen in the visitor browser.,The product promise is that files never leave the device; a server would contradict it and add cost.,Server transcription queue; hybrid with opt-in upload.,owner,2026-11-01,accepted,owner,
+DEC-static-hosting,Ship as a static bundle in nginx behind the shared Caddy proxy.,Nothing to compute server-side; the smallest reliable surface.,Object storage + CDN; serverless function host.,owner,2026-11-01,accepted,owner,
+DEC-ghcr-stack,Publish the image to GHCR and deploy as a Portainer stack per PRIN-3.,Matches the owner standard for every service.,"Build on the host (the current state, non-compliant).",owner,2026-11-01,accepted,owner,
+DEC-no-persistence,The app stores nothing except the browser model cache.,"No accounts, no uploads, nothing to retain or protect.",Job history in local storage.,owner,2026-11-01,accepted,owner,
+DEC-public-access,"Public, no authentication.",Owner decision 2026-11-01.,Shared password; unlisted URL.,owner,2026-11-01,accepted,owner,
+DEC-i18n-none,Interface is English-only at MVP; strings inline.,Utility audience; translation would double the surface for no current demand.,i18n-ready with a catalogue.,owner,2026-11-01,accepted,owner,
+DEC-no-framework,Vanilla DOM with module state instead of a component framework; deviation from PRAC-2 recorded rather than hidden.,One screen and a linear flow; a framework adds build weight and state machinery without benefit.,React or Svelte with a single store.,owner,2026-11-01,accepted,owner,
+DEC-progress-shape,Progress is chunk-based with elapsed/remaining and streaming partial text.,Owner delegated the choice; the blank-screen failure came from an invisible phase.,Spinner only; per-chunk bar without text.,owner,2026-11-01,accepted,owner,
+DEC-no-size-cap,No hard file-size limit; preflight device memory and fail honestly on OOM.,"Owner decision: processing is client-side, so the server is not at risk.",Fixed 500 MB cap.,owner,2026-11-01,accepted,owner,
+DEC-gpu-deferred,WebGPU acceleration deferred; CPU WASM is the MVP path.,Owner deferred; needs a second weight set and a device picker.,Dual-model build now.,owner,2026-11-01,accepted,owner,
+DEC-ffmpeg-pinned,Pin @ffmpeg/core exactly (currently a caret range).,Reproducible builds; the wasm core is a security-relevant binary.,Keep the caret range.,chief,2026-11-01,accepted,inferred,

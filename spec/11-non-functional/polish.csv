@@ -1,0 +1,6 @@
+id,area,want,level,targets,status,source,notes
+POL-gpu,perceived-speed,WebGPU path with a device picker and an fp32/fp16 weight set,standard,NFR-perf,accepted,owner,
+POL-diarisation,feedback,Speaker separation in the transcript,premium,,accepted,owner,
+POL-editing,feedback,Edit the transcript in-app before download,premium,,accepted,owner,
+POL-progress-detail,perceived-speed,Per-chunk timeline with a scrub of the partial transcript,standard,RUL-progress,accepted,owner,
+POL-themes,visual-consistency,Light theme option alongside the dark surface,essential,,accepted,owner,

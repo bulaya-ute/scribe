@@ -1,0 +1,5 @@
+id,kind,ref,version,status,source,notes
+SRC-model,document,Xenova/whisper-base ONNX q8,"encoder 23.2 MB + decoder 53.7 MB, vendored",accepted,owner,Checksums pinned in scripts/fetch-assets.sh and verified at image build.
+SRC-transformers,document,@huggingface/transformers,3.7.6,accepted,owner,
+SRC-ffmpeg,document,@ffmpeg/core single-thread,0.12.10,accepted,owner,Declared with a caret range today; must be pinned.
+SRC-onnxruntime,document,onnxruntime-web via transformers.js,"bundled, ort-wasm-simd-threaded + jsep",accepted,owner,

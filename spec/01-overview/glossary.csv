@@ -1,0 +1,6 @@
+id,term,definition,status,source,notes
+GLO-transcript,Transcript,"The text produced from a recording, delivered as a markdown document.",accepted,owner,
+GLO-chunk,Chunk,A 30-second slice of audio transcribed independently; progress is reported per chunk.,accepted,owner,
+GLO-on-device,On-device processing,Decoding and transcription run inside the visitor browser tab; no file bytes reach the server.,accepted,owner,
+GLO-model-cache,Model cache,Browser Cache Storage bucket holding the Whisper weights after the first run.,accepted,owner,
+GLO-fallback-decoder,Fallback decoder,"ffmpeg.wasm, used when the browser cannot natively decode the audio container.",accepted,owner,

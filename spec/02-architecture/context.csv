@@ -1,0 +1,3 @@
+id,name,kind,direction,exchanges,actor,status,source,notes
+CTX-browser,Visitor browser,actor,both,"Runs the app, decodes audio, transcribes, renders markdown",ACT-visitor,accepted,owner,
+CTX-host,Static host (Caddy),external-system,out,Serves the static bundle and vendored assets over HTTPS,,accepted,owner,

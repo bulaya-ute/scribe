@@ -1,0 +1,4 @@
+id,flow,step,from,to,message,status,source,notes
+SEQ-load,transcribe,1,ACT-visitor,CNT-web,GET / — app shell and assets,accepted,owner,
+SEQ-model,transcribe,2,CNT-web,ACT-visitor,"Model, ffmpeg and ORT assets streamed to the browser (cached)",accepted,owner,
+SEQ-local,transcribe,3,ACT-visitor,ACT-visitor,Audio decoded and transcribed in-tab; no further network traffic,accepted,owner,

@@ -1,0 +1,3 @@
+id,container,name,responsibility,status,source,notes
+CMP-shell,CNT-web,App shell,"index.html, compiled JS/CSS, favicon; CSP and security headers.",accepted,owner,
+CMP-assets,CNT-web,Vendored runtime assets,"Whisper weights, ffmpeg.wasm core and worker, ONNX runtime wasm, fonts.",accepted,owner,
